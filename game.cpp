@@ -8,9 +8,9 @@ class Box
         int mineCounts; //Mines in Adjacent Boxes
         bool mine; //If there is a Mine or Not
         bool known; //If the Box is Builtin or Not
-        bool marked; //If the Box is Marked
+        bool marked; //If the Box is Marked with Input
 
-        Box()
+        void ResetBox()
         {
             mineCounts = 0;
             mine = false;
@@ -23,13 +23,18 @@ void Board();
 void Input();
 void InitializeBoard();
 void CountAdjacentMines(int,int);
+void DetonateMines();
+void showMines();
+void PlayAgain();
 
-int rows = 16, cols = 16;
-int mines; //No. of Mines
+int rows = 8, cols = 8;
+int mines;
 int knownBoxes;
 Box board[30][30];
 Box solution[30][30];
 
+bool detonate; //To Quit the Board
+char playAgain = 'Y';
 random_device Seed; //RandomValue Generator
 uniform_int_distribution<int> randomNumber(1,rows);
 
@@ -38,20 +43,34 @@ int main()
 	cout << endl;
 	cout << "Welcome to the Mine Finder Board-Game. A Logical-Puzzle Game. \n\n";
 	
-    InitializeBoard();
-    cout << "Out of " << rows*cols << " Boxes, \n";
-    cout << "\t Number of Known Boxes: " << knownBoxes << endl;
-    cout << "\t Number of Mines: " << mines << endl;
-    Board();
-
-	//Main Game
-    while(true)
-    {
-        cout << "Select the Box (Row Col) on the Board: ";
-        Input();
+    do {
+        InitializeBoard();
+        cout << endl
+            << "Out of " << rows*cols << " Boxes, \n"
+            << "\t Number of Known Boxes: " << knownBoxes << endl
+            << "\t Number of Mines: " << mines << endl;
         Board();
+
+        //Main Game
+        while(true)
+        {
+            cout << "Select the Box (Row Col) on the Board: ";
+            Input();
+            
+            if(detonate)
+                break;
+        }
+        cout << endl;
+        PlayAgain();
     }
-	
+    while(playAgain == 'Y');
+    
+    cout << endl << endl;
+    cout << "Thanks for Playing. Hope You Enjoyed the Game! \n";
+    cout << "It would be very Kind of you, if you give us an Honest Feedback. \n\n";
+
+    cout << "You can Find me in GitHub https://github.com/Haseebullah9012. \n";
+
     getchar();
     return 0;
 }
@@ -93,6 +112,20 @@ void Input()
     int a,b;
     cin >> a >> b;
 
+    if(cin.fail()) {
+		cin.clear(); cin.ignore(255, '\n');
+		cout << "Oops! Its not Legal. \n"
+            << "Select from " << rows << " Rows and " << cols << " Columns. \n\n";
+		return;
+	}
+	
+    if(a==-8 && b==-8) {
+        detonate = true;
+        DetonateMines();
+        showMines();
+        return;
+    }
+
     if(a<1 || a>rows || b<1 || b>cols) {
         cout << "Oops! Its Outside the Board. \n"
             << "There are only " << rows << " Rows and " << cols << " Columns. \n\n";
@@ -124,67 +157,57 @@ void Input()
         board[r][c].marked = false; //Unmark the Box
         board[r][c].mine = false;
     }
-}
 
+    Board();
+}
 
 void InitializeBoard()
 {
+    //Reset Board
+    for(int r=0; r<rows; r++)
+        for(int c=0; c<cols; c++)
+            board[r][c].ResetBox();
+    knownBoxes = 0;
+    mines = 0;
+    detonate = false;
+    
+
     //Placement of Mines in the Board
     for(int r=0; r<rows; r++)
         for(int c=0; c<cols; c++)
-            if(random()%7==0)
-                board[r][c].mine = true; //Place the Mine with 1/7 Probability (14% Chance)
-    
-
-    //Known Boxes
-    for(int r=0; r<rows; r++) {
-        for(int c=0; c<cols; c++) {
-            if(board[r][c].mine)
+            if(random()%5==0) {
+                board[r][c].mine = true; //Place the Mine with 1/5 Probability (20% Chance)
                 mines++;
-            else
-                board[r][c].known = true;
-        }
-    }
+            }
     
+    //Known Boxes
     for(int r=0; r<rows; r++)
         for(int c=0; c<cols; c++)
-            if(board[r][c].known)
+            if(!board[r][c].mine) {
                 CountAdjacentMines(r,c);
+                if(board[r][c].mineCounts!=0) {
+                    board[r][c].known = true;
+                    knownBoxes++;
+                }
+            }
     
     //Store the Mines Location
     for(int r=0; r<rows; r++)
         for(int c=0; c<cols; c++)
             solution[r][c] = board[r][c];
     
-    
-    //Hide Known Boxes
-    for(int r=0; r<rows; r++)
-        for(int c=0; c<cols; c++)
-            if(board[r][c].known && board[r][c].mineCounts==0)
-                board[r][c].known = false; //Set Boxes Unknown with 0 Adjacent Mines
-    
-    cout << "\t The Board with Actual Mines Location (For Test Purpose).";
-    Board(); //Just for test Purpose
-    
-    for(int i=0, r,c; i<rows*5; i++)
-    {
-        r = randomNumber(Seed) -1;
-        c = randomNumber(Seed) -1;
-        if(board[r][c].known)
-            board[r][c].known = false; //Set some Boxes Unknown Randomly
-    }
-
     //Hide Mines
     for(int r=0; r<rows; r++)
         for(int c=0; c<cols; c++)
             board[r][c].mine = false;
     
-
-    //Count the Number of Known Boxes
+    //Hide Some Boxes for Puzzle Complexity
     for(int r=0; r<rows; r++)
         for(int c=0; c<cols; c++)
-            if(board[r][c].known)
-                knownBoxes++;
+            if(board[r][c].known && random()%12==0) {
+                board[r][c].known = false; //Set Box Unknown with 1/12 Probability
+                knownBoxes--;
+            }
 }
 
 void CountAdjacentMines(int r, int c)
@@ -212,4 +235,50 @@ void CountAdjacentMines(int r, int c)
         board[r][c].mineCounts++;
     if(board[r-1][c].mine)
         board[r][c].mineCounts++;
+}
+
+void DetonateMines()
+{
+    for(int r=0; r<rows; r++)
+        for(int c=0; c<cols; c++)
+            if(board[r][c].mine != solution[r][c].mine) {
+                cout << "Ah! You Lose. You did not Found the Mines Correctly. \n";
+                return;
+            }
+    
+    cout << "Congratulations! You Win. You Marked the Mines Correctly. \n";
+}
+
+void showMines()
+{
+    Box temp[rows][cols];
+    for(int r=0; r<rows; r++)
+        for(int c=0; c<cols; c++)
+            temp[r][c] = board[r][c];
+
+    for(int r=0; r<rows; r++)
+        for(int c=0; c<cols; c++)
+            board[r][c] = solution[r][c];
+    Board();
+
+    for(int r=0; r<rows; r++)
+        for(int c=0; c<cols; c++)
+            board[r][c] = temp[r][c];
+}
+
+
+void PlayAgain()
+{
+	cout << "Do You Want to Play Again (Y/N): ";
+	cin >> playAgain;
+	playAgain = toupper(playAgain);
+	cin.ignore(255, '\n');
+
+    if(playAgain != 'Y' && playAgain != 'N') {
+		cout << "   Oops! Its not a legal Response. \n\n";
+		cout << "Again, ";
+		PlayAgain();
+        
+        cout << endl << endl;
+	}
 }
