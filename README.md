@@ -17,13 +17,26 @@ Otherwise, there will be a lot of Casualities.
 
 ### How to Play:
 
-   1. Enter the **Index** (Row and Coloumn, seperated by Space) on the given Board to Select the Box. 
+   1. First, If You want, Do Some **_Configurations_**, 
+
+      - Enter the **Board Size** from the predefined Sizes: _Small, Medium, Large, or even Custom_. 
+        The given Predefined Board Sizes are, (Small:6x6, Medium:10x10, Large:16x16, Default:8x8). 
+        
+        - You can Enter your own Custom Size, by entering the _Total Rows and Columns_ of the Board. 
+          The Custom Range of Row-Column can be upto 4x4 to 30x30 
+         
+      - Enter the **Mine Probability** on the Places. It doesn't Means Difficulty. 
+        More Probability simply means, there will be More Mines. 
+        It cannot be more than 30% or less than 5%. 
+      
    
-   2. If there's a Mine in there, then Input Yes to Put the Mine Signboard.
+   2. Enter the **Index** (Row and Coloumn, seperated by Space) on the given Board to Select the Box. 
+   
+   3. If there's a Mine in there, then Input Yes to Put the Mine Signboard.
       If there's no Mine in there, then Input No to Declare it a Safezone.
      
-   3. You can Detonate the Place anytime by Entering -8-8 as an Input. 
+   4. You can Detonate the Place anytime by Entering -8-8 as an Input. 
       If you had Correclty Marked the Mines, You Win. Otherwise Lose. 
 
-   4. After Game Completion, You can **Play it Again**! 
+   5. After Game Completion, You can **Play it Again**! 
 
